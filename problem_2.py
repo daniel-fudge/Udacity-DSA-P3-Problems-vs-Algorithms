@@ -222,7 +222,6 @@ def user_tests():
         start_time = time()
         for _ in range(1000):
             actual = find_pivot(array=array, left=0, right=len(array) - 1)
-        # rotated_array_search(input_list=array, number=0)
         times.append(time() - start_time)
         if actual == expected:
             print(f"\tTest {test} passed in {times[-1]:.4f} seconds.")
@@ -234,7 +233,7 @@ def user_tests():
     print("\tSize, time (ms),    n, log n, actual scaled time ")
     for i in range(len(e_values)):
         n = 10 ** (e_values[i] - e_values[0])
-        print(f"\t10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
+        print(f"\t10^{e_values[i]},     {times[i]:.3f}, {n:>4},  {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
     print("You can see the time is rising so time complexity is > O(1), but way below linear < O(n).")
     print("This agrees with a time complexity of O(log n).")
 
@@ -262,7 +261,7 @@ def user_tests():
     print("\tSize, time (ms),    n, log n, actual scaled time ")
     for i in range(len(e_values)):
         n = 10 ** (e_values[i] - e_values[0])
-        print(f"\t10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
+        print(f"\t10^{e_values[i]},     {times[i]:.3f}, {n:>4},  {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
     print("You can see the time is rising so time complexity is > O(1), but way below linear < O(n).")
     print("This agrees with a time complexity of O(log n).")
 
@@ -289,7 +288,7 @@ def user_tests():
     print("\tSize, time (ms),    n, log n, actual scaled time ")
     for i in range(len(e_values)):
         n = 10 ** (e_values[i] - e_values[0])
-        print(f"\t10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
+        print(f"\t10^{e_values[i]},     {times[i]:.3f}, {n:>4},  {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
     print("You can see the time is rising so time complexity is > O(1), but way below linear < O(n).")
     print("This agrees with a time complexity of O(log n).")
 
