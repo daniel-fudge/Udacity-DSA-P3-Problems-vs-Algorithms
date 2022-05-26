@@ -51,8 +51,8 @@ def sqrt(number: int) -> int:
     Returns:
        int: Floored Square Root
 
-        Raises:
-            AttributeError: If the given number is not a positive integer.
+    Raises:
+        AttributeError: If the given number is not a positive integer.
     """
 
     # Check arguments
