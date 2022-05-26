@@ -4,7 +4,7 @@ from time import time
 from math import log2
 
 
-def binary_search(array: list, target: int, left: int, right: int) -> int:
+def binary_search(array: list, target: int, left_sorted: int, right_sorted: int, pivot: int) -> int:
     """Returns the index of the target in the array or -1 if not found.
 
     The pivot point is the largest element in the array and to the left of the smallest.
@@ -18,15 +18,21 @@ def binary_search(array: list, target: int, left: int, right: int) -> int:
     Args:
        array (list): Rotated list of sorted integers
        target (int): The number to search for
-       left (int): The left (min) most index of the array to search
-       right (int): The right (max) most index of the array to search
+       left_sorted (int): The left (min) most index of the array to search assuming the array was sorted
+       right_sorted (int): The right (max) most index of the array to search assuming the array was sorted
+       pivot (int): The pivot point that creates a fully sorted array
 
     Returns:
        int: Target index or -1
     """
 
+    # Convert the sorted indices to unsorted
+    n_elements = len(array)
+    right = (right_sorted + pivot + 1) % n_elements
+    left = (left_sorted + pivot + 1) % n_elements
+
     # Check for the final state where left and right are adjacent
-    if right - left <= 1:
+    if right_sorted - left_sorted <= 1:
         if array[left] == target:
             return left
         elif array[right] == target:
@@ -34,14 +40,16 @@ def binary_search(array: list, target: int, left: int, right: int) -> int:
         return -1
 
     # Find the middle of the range (mid) and check if we would the target
-    mid = (left + right) // 2
+    mid_sorted = (left_sorted + right_sorted) // 2
+    mid = (mid_sorted + pivot + 1) % n_elements
     if array[mid] == target:
         return mid
 
     # Search in the left or right half
     if array[mid] > target:
-        return binary_search(array=array, target=target, left=left, right=mid-1)
-    return binary_search(array=array, target=target, left=mid+1, right=right)
+        return binary_search(array=array, target=target, left_sorted=left_sorted, right_sorted=mid_sorted-1,
+                             pivot=pivot)
+    return binary_search(array=array, target=target, left_sorted=mid_sorted+1, right_sorted=right_sorted, pivot=pivot)
 
 
 def find_pivot(array: list, left: int, right: int) -> int:
@@ -106,31 +114,15 @@ def rotated_array_search(input_list: list, number: int) -> int:
         raise AttributeError("The input list must be an actual list.")
     if len(input_list) == 0:
         raise AttributeError("The input list can't be empty.")
-    for element in input_list:
-        if not isinstance(element, int):
-            raise AttributeError("The input list must be comprised of integers.")
 
     # Find the pivot point
     n_elements = len(input_list)
     pivot = find_pivot(array=input_list, left=0, right=n_elements-1)
 
-    # Make a sorted version of the input list
-    #   We could have reused the input list to avoid duplicating the memory but chose not to modify the original
-    #   We also have to be careful when the trying to make a slice of the list when the pivot is at the end
-    if pivot == n_elements - 1:
-        sorted_list = input_list
-    elif pivot == n_elements - 2:
-        sorted_list = [input_list[pivot + 1]] + input_list[:pivot + 1]
-    else:
-        sorted_list = input_list[pivot + 1:] + input_list[:pivot + 1]
+    # Now do a binary search for the desired number with a pivot offset to the indices
+    index = binary_search(array=input_list, target=number, left_sorted=0, right_sorted=n_elements-1, pivot=pivot)
 
-    # Now do a simple binary search for the desired number
-    sorted_index = binary_search(array=sorted_list, target=number, left=0, right=n_elements-1)
-
-    # Return -1 if not found or add the pivot back to the sorted index
-    if sorted_index < 0:
-        return -1
-    return (sorted_index + pivot + 1) % n_elements
+    return index
 
 
 def linear_search(input_list: list, number: int) -> int:
@@ -185,7 +177,7 @@ def user_tests():
     for array, target, expected in [([1, 2, 3, 4, 6, 7, 8, 9, 10], 1, 0), ([1, 3], 1, 0), ([1, 3], 3, 1), ([3], 3, 0),
                                     ([1, 3, 7], 9, -1)]:
         test += 1
-        actual = binary_search(array=array, target=target, left=0, right=len(array)-1)
+        actual = binary_search(array=array, target=target, left_sorted=0, right_sorted=len(array)-1, pivot=len(array)-1)
         if actual == expected:
             print(f"Test {test} passed.")
         else:
@@ -218,83 +210,88 @@ def user_tests():
             print(f"Error test {test}: expected an AttributeError exception.")
             n_errors += 1
 
-        if arg:
-            test += 1
-            try:
-                # noinspection PyTypeChecker
-                rotated_array_search(input_list=good_list + [arg], number=good_target)
-            except AttributeError:
-                print(f"Test {test} passed.")
-            else:
-                print(f"Error test {test}: expected an AttributeError exception.")
-                n_errors += 1
-
-    # User Test Case 6 - Scaling test of
-    print("\nUser test set 6 - Four other lists timed for scalability check.")
+    # User Test Case 4 - Scaling test of find_pivot
+    print("\nUser test set 4 - find_pivot log n runtime complexity check.")
     times = []
-    e_values = [4, 5, 6, 7]
+    e_values = [6 + i for i in range(3)]
+    test = 0
     for e in e_values:
+        test += 1
+        array = [i for i in range(1, 10 ** e)] + [0]
+        expected = 10 ** e - 2
         start_time = time()
-        rotated_array_search(input_list=[i for i in range(1, 10 ** e)] + [0], number=target)
+        for _ in range(1000):
+            actual = find_pivot(array=array, left=0, right=len(array) - 1)
+        # rotated_array_search(input_list=array, number=0)
         times.append(time() - start_time)
-    print("Size, time (s),    n, log n, actual scaled time ")
+        if actual == expected:
+            print(f"\tTest {test} passed in {times[-1]:.4f} seconds.")
+        else:
+            print(f"\tError test {test}: expected {expected}, but got {actual}.")
+            n_errors += 1
+        del array
+
+    print("\tSize, time (ms),    n, log n, actual scaled time ")
     for i in range(len(e_values)):
         n = 10 ** (e_values[i] - e_values[0])
-        print(f"10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>3.1f}, {times[i]/times[0]:>6.1f}")
+        print(f"\t10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
     print("You can see the time is rising so time complexity is > O(1), but way below linear < O(n).")
     print("This agrees with a time complexity of O(log n).")
 
-    """
-
-
-    # Test set 4 - Test the rotated array search function with negative numbers
-    print("\nUser test set 4 - Testing the rotated array search function with negative numbers")
+    # User Test Case 5 - Scaling test of binary_search
+    print("\nUser test set 5 - binary_search log n runtime complexity check.")
+    times = []
+    e_values = [6 + i for i in range(3)]
     test = 0
-    for array, target, expected in [([1, 2, -1], 1, 0), ([1, 2, -1], -1, 2), ([1, 2, -1], -5, -1)]:
+    expected = 0
+    for e in e_values:
         test += 1
-        actual = rotated_array_search(input_list=array, number=target)
-        if actual == expected:
-            print(f"Test {test} passed.")
-        else:
-            print(f"Error test {test}: expected {expected}, but got {actual}.")
-            n_errors += 1
-
-    # User Test Case 5 - Very large number
-    print("\nUser test set 5 - Worst case very large number; rotated by 1 element and searching for min element.")
-    test = 1
-    e = 8
-    n = 10**e
-    input_list = [i for i in range(1, n)] + [0]
-    target = 0
-    expected = n - 1
-    start_time = time()
-    actual = rotated_array_search(input_list=input_list, number=target)
-    runtime = time() - start_time
-    if actual == expected:
-        print(f"Test {test} passed; worst case with 10^{e} elements solved in {runtime:.2f} seconds.")
-    else:
-        print(f"Error test {test}: expected {expected}, but got {actual}.")
-        n_errors += 1
-
-    # User Test Case 6 - Scaling test
-    print("\nUser test set 6 - Four other lists timed for scalability check.")
-    times = [runtime]
-    e_values = [e]
-    for _ in range(4):
-        e -= 1
-        n = 10 ** e
-        input_list = [i for i in range(1, n)] + [0]
+        array = [i for i in range(10 ** e)]
         start_time = time()
-        rotated_array_search(input_list=input_list, number=target)
+        for _ in range(1000):
+            actual = binary_search(array=array, target=0, left_sorted=0, right_sorted=len(array) - 1,
+                                   pivot=len(array)-1)
         times.append(time() - start_time)
-        e_values.append(e)
-    print("Size,     time (ms), s. ratio, t. ratio")
-    print(f"10^{e_values[-1]}, {times[-1]:.4f},    N/A,      N/A")
-    for i in range(len(e_values)-2, -1, -1):
-        print(f"10^{e_values[i]}, {times[i]:.3f},    10, {times[i]/times[i+1]:.1f}")
+        if actual == expected:
+            print(f"\tTest {test} passed in {times[-1]:.4f} seconds.")
+        else:
+            print(f"\tError test {test}: expected {expected}, but got {actual}.")
+            n_errors += 1
+        del array
+
+    print("\tSize, time (ms),    n, log n, actual scaled time ")
+    for i in range(len(e_values)):
+        n = 10 ** (e_values[i] - e_values[0])
+        print(f"\t10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
     print("You can see the time is rising so time complexity is > O(1), but way below linear < O(n).")
     print("This agrees with a time complexity of O(log n).")
-    """
+
+    # User Test Case 6 - Scaling test of rotated_array_search
+    print("\nUser test set 6 - rotated_array_search log n runtime complexity check.")
+    times = []
+    e_values = [6 + i for i in range(3)]
+    test = 0
+    for e in e_values:
+        test += 1
+        array = [i for i in range(1, 10 ** e)] + [0]
+        expected = 10 ** e - 1
+        start_time = time()
+        for _ in range(1000):
+            actual = rotated_array_search(input_list=array, number=0)
+        times.append(time() - start_time)
+        if actual == expected:
+            print(f"\tTest {test} passed in {times[-1]:.4f} seconds.")
+        else:
+            print(f"\tError test {test}: expected {expected}, but got {actual}.")
+            n_errors += 1
+        del array
+
+    print("\tSize, time (ms),    n, log n, actual scaled time ")
+    for i in range(len(e_values)):
+        n = 10 ** (e_values[i] - e_values[0])
+        print(f"\t10^{e_values[i]},    {times[i]:.3f}, {n:>4},   {log2(n):>4.1f}, {times[i]/times[0]:>6.1f}")
+    print("You can see the time is rising so time complexity is > O(1), but way below linear < O(n).")
+    print("This agrees with a time complexity of O(log n).")
 
     print("\n*******************")
     if n_errors > 0:
