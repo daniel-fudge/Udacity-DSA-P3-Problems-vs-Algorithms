@@ -15,7 +15,7 @@ def sort_012(input_list: list) -> list:
         list: The sorted version of the input list
 
     Raises:
-        AttributeError: If the argument is not a list or empty
+        AttributeError: If the argument is not a list or an empty list
     """
 
     # Check arguments
