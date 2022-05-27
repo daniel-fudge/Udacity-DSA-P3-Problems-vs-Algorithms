@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from math import log2
+import random
 from time import time
 
 

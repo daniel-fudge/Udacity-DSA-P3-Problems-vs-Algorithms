@@ -21,7 +21,8 @@ See [explanation_3.md](explanation_3.md) for more details and [problem_3.py](pro
 See [explanation_4.md](explanation_4.md) for more details and [problem_4.py](problem_4.py) for the solution. 
 
 ### Problem 5 - Autocomplete with Tries
-See [explanation_5.md](explanation_5.md) for more details and [problem_5.py](problem_5.py) for the solution. 
+See [explanation_5.md](explanation_5.md) for more details and [Trie.ipynb](Trie.ipynb) for the solution. Note this 
+question is a copy of the Udacity Notebook, instead of pure python code.   
 
 ### Problem 6 - Unsorted Integer Array
 See [explanation_6.md](explanation_6.md) for more details and [problem_6.py](problem_6.py) for the solution. 
