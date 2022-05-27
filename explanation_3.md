@@ -1,4 +1,4 @@
-# Problem 1 of the Data Structures Project
+# Problem 3 of the Data Structures Project
 
 ### Assumptions
 
