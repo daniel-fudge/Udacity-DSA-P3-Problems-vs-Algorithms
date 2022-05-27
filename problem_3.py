@@ -158,7 +158,7 @@ def user_tests():
             n_errors += 1
 
     # User Test Case 3 - Scaling test of rearrange_digits
-    print("\nUser test set 4 - rearrange_digits O(nlog n) runtime complexity check.")
+    print("\nUser test set 3 - rearrange_digits O(nlog n) runtime complexity check.")
     times = []
     e_values = [4 + i for i in range(3)]
     test = 0
