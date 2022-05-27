@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-from math import log2
-import random
-from time import time
-
 
 class RouteTrieNode:
     """A RouteTrieNode will be similar to our autocomplete TrieNode... with one additional element, a handler."""
@@ -186,15 +182,32 @@ def test_handler_not_found() -> int:
     test = 0
     n_errors = 0
     good_handler = "good_handler"
-    good_router = Router(root_handler=good_handler, error_handler=good_handler)
-    for path in [f"{'/'*i}some/middle/content{'/'*j}" for i in range(3) for j in range(3)]:
+    error_handler = "error_handler"
+    good_router = Router(root_handler=good_handler, error_handler=error_handler)
+
+    # Create a path with handle on every second sub path
+    full_path = ""
+    n_paths = 5
+    for p in range(n_paths):
+        full_path += f"/path{p}"
+        if p % 2 == 0:
+            good_router.add_handler(full_path=full_path, handler=good_handler)
+
+    # Check that only every second path has a handle
+    full_path = ""
+    for p in range(n_paths):
         test += 1
-        good_router.add_handler(full_path=path, handler=good_handler)
-        handler = good_router.lookup(full_path=path)
-        if handler == good_handler:
+        full_path += f"/path{p}"
+        actual = good_router.lookup(full_path=full_path)
+        if p % 2 == 0:
+            expected = good_handler
+        else:
+            expected = error_handler
+
+        if actual == expected:
             print(f"Test {test} passed.")
         else:
-            print(f"Test {test} failed: path = {path}, actual handler = {handler}, expected = {good_handler}.")
+            print(f"Test {test} failed: path = {full_path}, actual handler = {actual}, expected = {expected}.")
             n_errors += 1
 
     return n_errors
@@ -310,7 +323,7 @@ def user_tests() -> int:
     n_errors += test_invalid_arguments()
 
     # Test "not found handler" (BONUS POINTS)
-    print("\nUser test set 2 - 'Not found handler' (MORE BONUS POINTS).")
+    print("\nUser test set 2 - 'Not found handler' (BONUS POINTS).")
     n_errors += test_handler_not_found()
 
     # Test multiple leading and trailing "/" (MORE BONUS POINTS)
