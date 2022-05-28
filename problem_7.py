@@ -124,7 +124,7 @@ class Router:
             str | None: The handle of the matching path or None if not found
 
         Raises:
-            AttributeError: If argument is not a string
+            AttributeError: If the argument is not a string
         """
 
         # Check arguments
