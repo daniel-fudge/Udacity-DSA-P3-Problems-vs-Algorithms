@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import random
+from time import time
 
 
 class TrieNode:
@@ -176,6 +177,55 @@ def test_find() -> int:
     return n_errors
 
 
+def test_scale() -> int:
+    """Test the time complexity.
+
+    Returns:
+        int: The number of errors
+    """
+
+    insert_times = []
+    find_times = []
+    e_values = [5 + i for i in range(3)]
+    test = 0
+    for e in e_values:
+        trie = Trie()
+        word = "".join([chr(random.randint(97, 122)) for _ in range(10**e)])
+
+        test += 1
+        start_time = time()
+        trie.insert(word=word)
+        insert_times.append(time() - start_time)
+        print(f"\tTest {test} insert completed in {insert_times[-1]:.2f} seconds for n = 10^{e}.")
+
+        test += 1
+        start_time = time()
+        trie.find(prefix=word)
+        find_times.append(time() - start_time)
+        print(f"\tTest {test} find completed in {find_times[-1]:.2f} seconds for n = 10^{e}.")
+
+    print("")
+    print("\t     |  time in sec  |   |  Scaled time")
+    print("\tSize | insert | find | n | insert | find")
+    print("\t-----------------------------------------")
+    n_errors = 0
+    for i in range(len(e_values)):
+        n = 10 ** (e_values[i] - e_values[0])
+        s_insert = insert_times[i]/insert_times[0]
+        s_find = find_times[i]/find_times[0]
+        line = f"\t10^{e_values[i]} | {insert_times[i]:>6.3f} | {find_times[i]:.3f} | {n:>4} | "
+        line += f"{s_insert:>6.1f} | {s_find:>6.1f}"
+        print(line)
+        if (s_insert/n > 2) or (s_insert/n < 0.5) or (s_find/n > 2) or (s_find/n < 0.5):
+            print(f"Time complexity check for n = {n} failed.")
+            n_errors += 1
+
+    print("You can see the scaled time is rising slightly above n.")
+    print("This agrees with a time complexity of O(n).")
+
+    return n_errors
+
+
 # noinspection PyBroadException
 def user_tests() -> int:
     """Runs the user tests.
@@ -188,15 +238,19 @@ def user_tests() -> int:
 
     # Test set 1 - Invalid arguments
     print("\nUser test set 1 - Invalid insert arguments.")
-    # n_errors += test_invalid_insert_arguments()
+    n_errors += test_invalid_insert_arguments()
 
     # Test set 2 - Invalid find arguments
     print("\nUser test set 2 - Invalid find arguments.")
-    # n_errors += test_invalid_find_arguments()
+    n_errors += test_invalid_find_arguments()
 
     # Test set 3 - Test find capability
     print("\nUser test set 3 - Test find capability.")
     n_errors += test_find()
+
+    # Test set 4 - Time complexity check
+    print("\nUser test set 4 - O(n) runtime complexity check.")
+    n_errors += test_scale()
 
     return n_errors
 
