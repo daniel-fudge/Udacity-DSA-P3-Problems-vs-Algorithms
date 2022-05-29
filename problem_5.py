@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import random
 from time import time
+import sys
 
 
 class TrieNode:
@@ -177,8 +178,42 @@ def test_find() -> int:
     return n_errors
 
 
+def test_suffixes() -> int:
+    """Test the "suffixes" method.
+
+    Returns:
+        int: The number of errors
+    """
+    test = 0
+    n_errors = 0
+
+    # Create a Trie of 10 random lower case words of length 2 through 5
+    suffixes = ["".join([chr(random.randint(97, 122)) for _ in range(random.randint(2, 5))]) for __ in range(10)]
+    words = ["".join(suffixes[:i]) for i in range(1, len(suffixes)+1)]
+
+    trie = Trie()
+    for word in words:
+        trie.insert(word=word)
+
+    # Check that all the suffixes are found
+    for i, word in enumerate(words):
+        test += 1
+
+        node = trie.find(prefix=word[:-1])
+        actual = len(node.suffixes())
+        expected = len(words) - i
+
+        if actual == expected:
+            print(f"Test {test} passed.")
+        else:
+            print(f"Test {test} failed: word = {word}, actual = {actual}, expected = {expected}.")
+            n_errors += 1
+
+    return n_errors
+
+
 def test_scale() -> int:
-    """Test the time complexity.
+    """Test the time complexity for the find and insert.
 
     Returns:
         int: The number of errors
@@ -205,9 +240,9 @@ def test_scale() -> int:
         print(f"\tTest {test} find completed in {find_times[-1]:.2f} seconds for n = 10^{e}.")
 
     print("")
-    print("\t     |  time in sec  |   |  Scaled time")
-    print("\tSize | insert | find | n | insert | find")
-    print("\t-----------------------------------------")
+    print("\t     |  time in sec   |      |  Scaled time")
+    print("\tSize | insert |  find |   n  | insert | find")
+    print("\t--------------------------------------------")
     n_errors = 0
     for i in range(len(e_values)):
         n = 10 ** (e_values[i] - e_values[0])
@@ -216,11 +251,49 @@ def test_scale() -> int:
         line = f"\t10^{e_values[i]} | {insert_times[i]:>6.3f} | {find_times[i]:.3f} | {n:>4} | "
         line += f"{s_insert:>6.1f} | {s_find:>6.1f}"
         print(line)
-        if (s_insert/n > 2) or (s_insert/n < 0.5) or (s_find/n > 2) or (s_find/n < 0.5):
+        if (s_insert/n > 3) or (s_insert/n < 0.5) or (s_find/n > 3) or (s_find/n < 0.5):
             print(f"Time complexity check for n = {n} failed.")
             n_errors += 1
+    print("You can see the scaled time is rising very close to n.")
+    print("This agrees with a time complexity of O(n).")
 
-    print("You can see the scaled time is rising slightly above n.")
+    return n_errors
+
+
+def test_scale_suffixes() -> int:
+    """Test the time complexity for the "suffixes" method.
+
+    Returns:
+        int: The number of errors
+    """
+    sys.setrecursionlimit(1008)
+
+    suffix_times = []
+    e_values = [1 + i for i in range(3)]
+    test = 0
+    for e in e_values:
+        trie = Trie()
+        trie.insert(word="".join([chr(random.randint(97, 122)) for _ in range(10**e)]))
+
+        test += 1
+        start_time = time()
+        for _ in range(10000):
+            trie.root.suffixes()
+        suffix_times.append((time() - start_time)/10)
+
+    print("")
+    print("\t     | time (ms) |      | Scaled time")
+    print("\tSize |  suffix   |  n   |   suffix")
+    print("\t--------------------------- ---------")
+    n_errors = 0
+    for i in range(len(e_values)):
+        n = 10 ** (e_values[i] - e_values[0])
+        s_suffix = suffix_times[i] / suffix_times[0]
+        print(f"\t10^{e_values[i]} | {suffix_times[i]:>9.3f} | {n:>4} | {s_suffix:>6.1f}")
+        if (s_suffix / n > 3) or (s_suffix / n < 0.5):
+            print(f"Time complexity check for n = {n} failed.")
+            n_errors += 1
+    print("You can see the scaled time is rising very close to n.")
     print("This agrees with a time complexity of O(n).")
 
     return n_errors
@@ -244,13 +317,21 @@ def user_tests() -> int:
     print("\nUser test set 2 - Invalid find arguments.")
     n_errors += test_invalid_find_arguments()
 
-    # Test set 3 - Test find capability
-    print("\nUser test set 3 - Test find capability.")
+    # Test set 3 - Test suffixes capability
+    print("\nUser test set 3 - Test suffixes capability.")
+    n_errors += test_suffixes()
+
+    # Test set 4 - Test find capability
+    print("\nUser test set 4 - Test find capability.")
     n_errors += test_find()
 
-    # Test set 4 - Time complexity check
-    print("\nUser test set 4 - O(n) runtime complexity check.")
+    # Test set 5 - Time complexity check for find and insert
+    print("\nUser test set 5 - find and insert O(n) runtime complexity check.")
     n_errors += test_scale()
+
+    # Test set 5 - Time complexity check
+    print("\nUser test set 5 - suffix O(n) runtime complexity check.")
+    n_errors += test_scale_suffixes()
 
     return n_errors
 

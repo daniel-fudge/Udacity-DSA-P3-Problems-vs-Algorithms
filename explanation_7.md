@@ -8,11 +8,64 @@ common prefixes, unlike a simple dictionary of paths and associated handlers.
 Note user test set 2 and 3, demonstrate the bonus and "more bonus" capabilities.
 
 ## Time Efficiency
-In practice, the number of nodes "n" in this trie is will never become large enough to make the time or space complexity 
-a major design concern.   
-Since find and insert method of the trie completely traverse the given full path, their time complexity is O(n). 
+In the following discussion, "c" is the number of characters in the full path and "n" is the 
+number words in the full path separated by "/" characters. Within the trie, each of these "n" words are nodes. Since "c"
+equals "n" times the average word, "n" < "c". If "n" became very large, O(n) ~ O(c). 
+
+### RouteTrieNode.__init__
+This method simply sets the node attributes so has a O(1) time complexity.
+
+### RouteTrieNode.insert
+This method simply creates and adds a child node for the given character so has a O(1) time complexity.
+
+### RouteTrie.__init__
+This method simply sets the trie attributes so has a O(1) time complexity.
+
+### RouteTrie.insert
+This method has to split the given full path by the "/" character, which requires a full traversal through all "c" 
+characters in the given path, therefore the time complexity is O(c). It also adds each of the resulting words to the 
+trie as a node with a time complexity of O(n). Combined this gives O(c + n) ~ O(n).
+
+### RouteTrie.find
+Similar to the `RouteTrie.insert` method, this method has to split the given path of "c" characters on the "/" character 
+into "n" words (nodes) and then check if these nodes are in the Trie. Therefore, the time complexity is O(c + n) ~ O(n). 
+
+### Router.__init__
+This method simply sets the router attributes so has a O(1) time complexity.
+
+### Router.add_handler
+This method calls the `RouteTrie.insert` method so as discussed above has a time complexity of O(c + n) ~ O(n).
+
+### Router.lookup
+This method calls the `RouteTrie.find` method so as discussed above has a time complexity of O(c + n) ~ O(n).
+
 
 ## Space Efficiency
-Since find and insert method of the trie do not build any data structures or use recursive functions (no call stack), 
-their space complexity is O(1).   
-Since the Trie saves each path as a node, it's space complexity is O(n).  
+There are no recursions in this implementation, so we do not have a call stack to consider. The primary space complexity 
+drivers are the given full path of "c" characters and the resulting "n" nodes in the trie.
+
+### RouteTrieNode.__init__
+This method simply sets the node attributes so has a O(1) space complexity.
+
+### RouteTrieNode.insert
+This method simply creates and adds a child node for the given character so has a O(1) space complexity.
+
+### RouteTrie.__init__
+This method simply sets the trie attributes so has a O(1) space complexity.
+
+### RouteTrie.insert
+This method has to split the given full path by the "/" character into "n" words and adds each of the resulting words to 
+the trie as a node. This gives a space complexity of O(n).
+
+### RouteTrie.find
+Similar to the `RouteTrie.insert` method, this method has to split the given path of "c" characters on the "/" character 
+into "n" words (nodes) and then check if these nodes are in the Trie. Therefore, the space complexity is O(n). 
+
+### Router.__init__
+This method simply sets the router attributes so has a O(1) space complexity.
+
+### Router.add_handler
+This method calls the `RouteTrie.insert` method so as discussed above has a space complexity of O(n).
+
+### Router.lookup
+This method calls the `RouteTrie.find` method so as discussed above has a space complexity of O(n).
